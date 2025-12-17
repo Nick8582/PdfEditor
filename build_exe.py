@@ -1,10 +1,20 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Скрипт для сборки exe файла из main.py (десктопное приложение)
 """
 import PyInstaller.__main__
 import sys
 import os
+import io
+
+# Устанавливаем UTF-8 для вывода (для поддержки эмодзи и кириллицы)
+if sys.platform == 'win32':
+    # На Windows устанавливаем UTF-8 для stdout
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+    if hasattr(sys.stderr, 'reconfigure'):
+        sys.stderr.reconfigure(encoding='utf-8')
 
 def build_exe():
     """Собирает exe файл из main.py"""
@@ -31,20 +41,21 @@ def build_exe():
     if sys.platform == 'win32':
         args.append('--noconsole')
     
-    print("Начинаем сборку exe файла...")
-    print(f"Параметры: {' '.join(args)}")
+    # Используем ASCII-совместимые сообщения для совместимости
+    print("Starting EXE build...")
+    print(f"Parameters: {' '.join(args)}")
     
     try:
         PyInstaller.__main__.run(args)
-        print("\n✅ Сборка завершена успешно!")
+        print("\n[SUCCESS] Build completed successfully!")
         if sys.platform == 'darwin':  # macOS
-            print("📁 Приложение находится в папке: dist/PDFEditor.app")
+            print("[INFO] Application is in: dist/PDFEditor.app")
         elif sys.platform == 'win32':  # Windows
-            print("📁 exe файл находится в папке: dist/PDFEditor.exe")
+            print("[INFO] EXE file is in: dist/PDFEditor.exe")
         else:  # Linux
-            print("📁 Исполняемый файл находится в папке: dist/PDFEditor")
+            print("[INFO] Executable is in: dist/PDFEditor")
     except Exception as e:
-        print(f"\n❌ Ошибка при сборке: {e}")
+        print(f"\n[ERROR] Build failed: {e}")
         sys.exit(1)
 
 if __name__ == '__main__':
