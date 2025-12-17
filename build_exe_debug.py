@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Скрипт для сборки exe файла из main.py (десктопное приложение)
+Скрипт для сборки exe файла с консолью для отладки (десктопное приложение)
 """
 import PyInstaller.__main__
 import sys
@@ -16,15 +16,15 @@ if sys.platform == 'win32':
     if hasattr(sys.stderr, 'reconfigure'):
         sys.stderr.reconfigure(encoding='utf-8')
 
-def build_exe():
-    """Собирает exe файл из main.py"""
+def build_exe_debug():
+    """Собирает exe файл из main.py с консолью для отладки"""
     
     # Параметры для PyInstaller
     args = [
         'main.py',
-        '--name=PDFEditor',
+        '--name=PDFEditor_debug',
         '--onefile',  # Один exe файл
-        '--windowed',  # Без консоли (для GUI приложения)
+        '--console',  # С консолью для отладки
         # Иконку можно добавить позже: '--icon=icon.ico'
         
         # Tkinter импорты
@@ -61,29 +61,29 @@ def build_exe():
     
     # Если на Windows, добавляем специфичные параметры
     if sys.platform == 'win32':
-        # Для отладки можно использовать --console вместо --noconsole
-        # args.append('--console')  # Раскомментируйте для отладки
-        args.append('--noconsole')  # Без консоли для финальной версии
         # На Windows добавляем обработку путей
         args.append('--paths=.')
     
     # Используем ASCII-совместимые сообщения для совместимости
-    print("Starting EXE build...")
+    print("Starting DEBUG EXE build (with console)...")
     print(f"Parameters: {' '.join(args)}")
     
     try:
         PyInstaller.__main__.run(args)
-        print("\n[SUCCESS] Build completed successfully!")
+        print("\n[SUCCESS] Debug build completed successfully!")
         if sys.platform == 'darwin':  # macOS
-            print("[INFO] Application is in: dist/PDFEditor.app")
+            print("[INFO] Application is in: dist/PDFEditor_debug.app")
         elif sys.platform == 'win32':  # Windows
-            print("[INFO] EXE file is in: dist/PDFEditor.exe")
+            print("[INFO] EXE file is in: dist/PDFEditor_debug.exe")
+            print("[INFO] This version has console enabled for debugging")
         else:  # Linux
-            print("[INFO] Executable is in: dist/PDFEditor")
+            print("[INFO] Executable is in: dist/PDFEditor_debug")
     except Exception as e:
         print(f"\n[ERROR] Build failed: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 if __name__ == '__main__':
-    build_exe()
+    build_exe_debug()
 

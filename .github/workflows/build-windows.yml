@@ -27,10 +27,17 @@ jobs:
     - name: Build EXE (Desktop)
       run: |
         python build_exe.py
+      continue-on-error: true
+        
+    - name: Build EXE (Desktop Debug)
+      run: |
+        python build_exe_debug.py
+      continue-on-error: true
         
     - name: Build EXE (Web)
       run: |
         python build_web_exe.py
+      continue-on-error: true
         
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -38,6 +45,8 @@ jobs:
         name: windows-exe-files
         path: |
           dist/PDFEditor.exe
+          dist/PDFEditor_debug.exe
           dist/PDFEditorWeb.exe
         retention-days: 30
+        if-no-files-found: warn
 

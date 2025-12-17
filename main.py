@@ -895,9 +895,13 @@ class PDFEditor:
         
         # Режим пипетки для выбора цвета
         if self.selection_mode == 'eyedropper':
+            # Преобразуем координаты с учетом прокрутки
+            canvas_x = self.canvas.canvasx(event.x)
+            canvas_y = self.canvas.canvasy(event.y)
+            
             # Получаем координаты в масштабе страницы
-            page_x = (event.x - 20) / self.zoom
-            page_y = (event.y - 20) / self.zoom
+            page_x = (canvas_x - 20) / self.zoom
+            page_y = (canvas_y - 20) / self.zoom
             
             # Получаем страницу PDF
             page = self.pdf_document[self.current_page]
@@ -949,10 +953,14 @@ class PDFEditor:
         
         # Режим удаления элементов по клику
         if self.selection_mode == 'remove':
+            # Преобразуем координаты с учетом прокрутки
+            canvas_x = self.canvas.canvasx(event.x)
+            canvas_y = self.canvas.canvasy(event.y)
+            
             page_key = f"page_{self.current_page}"
             if page_key in self.selection_rects:
                 # Находим ближайший элемент к точке клика
-                clicked_items = self.canvas.find_closest(event.x, event.y)
+                clicked_items = self.canvas.find_closest(canvas_x, canvas_y)
                 if clicked_items:
                     item_id = clicked_items[0]
                     tags = self.canvas.gettags(item_id)
@@ -964,7 +972,7 @@ class PDFEditor:
                         # Нормализация координат (на случай, если они перевернуты)
                         x_min, x_max = min(x1, x2), max(x1, x2)
                         y_min, y_max = min(y1, y2), max(y1, y2)
-                        if x_min <= event.x <= x_max and y_min <= event.y <= y_max:
+                        if x_min <= canvas_x <= x_max and y_min <= canvas_y <= y_max:
                             if 'delete_area' in tags:
                                 # Находим индекс области
                                 for rect_id, idx in self.selection_rects[page_key]['delete']:
@@ -999,9 +1007,13 @@ class PDFEditor:
         
         # Режим вставки контента
         if self.selection_mode == 'insert':
+            # Преобразуем координаты с учетом прокрутки
+            canvas_x = self.canvas.canvasx(event.x)
+            canvas_y = self.canvas.canvasy(event.y)
+            
             # Получаем координаты в масштабе страницы
-            page_x = (event.x - 20) / self.zoom
-            page_y = (event.y - 20) / self.zoom
+            page_x = (canvas_x - 20) / self.zoom
+            page_y = (canvas_y - 20) / self.zoom
             
             # Получаем страницу PDF
             page = self.pdf_document[self.current_page]
@@ -1015,15 +1027,19 @@ class PDFEditor:
         
         # Режимы выделения
         if self.selection_mode in ('delete', 'color'):
-            self.start_x = (event.x - 20) / self.zoom
-            self.start_y = (event.y - 20) / self.zoom
+            # Преобразуем координаты с учетом прокрутки
+            canvas_x = self.canvas.canvasx(event.x)
+            canvas_y = self.canvas.canvasy(event.y)
+            
+            self.start_x = (canvas_x - 20) / self.zoom
+            self.start_y = (canvas_y - 20) / self.zoom
             
             # Удаляем предыдущий прямоугольник, если он есть
             if self.rect_id is not None:
                 self.canvas.delete(self.rect_id)
             
             self.rect_id = self.canvas.create_rectangle(
-                event.x, event.y, event.x, event.y,
+                canvas_x, canvas_y, canvas_x, canvas_y,
                 outline='green' if self.selection_mode == 'delete' else 'blue',
                 width=2
             )
@@ -1034,10 +1050,14 @@ class PDFEditor:
             self.rect_id is not None and 
             self.start_x is not None and 
             self.start_y is not None):
+            # Преобразуем координаты с учетом прокрутки
+            canvas_x = self.canvas.canvasx(event.x)
+            canvas_y = self.canvas.canvasy(event.y)
+            
             self.canvas.coords(self.rect_id, 
                               self.start_x * self.zoom + 20, 
                               self.start_y * self.zoom + 20,
-                              event.x, event.y)
+                              canvas_x, canvas_y)
     
     def invalidate_preview_cache(self, page_num=None):
         """Инвалидация кэша предпросмотра для страницы"""
@@ -1058,15 +1078,19 @@ class PDFEditor:
             not (0 <= self.current_page < self.total_pages)):
             return
         
-            end_x = (event.x - 20) / self.zoom
-            end_y = (event.y - 20) / self.zoom
-            
-            # Нормализация координат
-            x1 = min(self.start_x, end_x)
-            y1 = min(self.start_y, end_y)
-            x2 = max(self.start_x, end_x)
-            y2 = max(self.start_y, end_y)
-            
+        # Преобразуем координаты с учетом прокрутки
+        canvas_x = self.canvas.canvasx(event.x)
+        canvas_y = self.canvas.canvasy(event.y)
+        
+        end_x = (canvas_x - 20) / self.zoom
+        end_y = (canvas_y - 20) / self.zoom
+        
+        # Нормализация координат
+        x1 = min(self.start_x, end_x)
+        y1 = min(self.start_y, end_y)
+        x2 = max(self.start_x, end_x)
+        y2 = max(self.start_y, end_y)
+        
         # Проверка минимального размера области
         if abs(x2 - x1) < 5 or abs(y2 - y1) < 5:
             self.canvas.delete(self.rect_id)
