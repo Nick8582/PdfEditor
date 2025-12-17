@@ -1,0 +1,43 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:  # Запуск вручную через GitHub UI
+  push:
+    tags:
+      - 'v*'  # Автоматически при создании тега (например, v1.0.0)
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Build EXE (Desktop)
+      run: |
+        python build_exe.py
+        
+    - name: Build EXE (Web)
+      run: |
+        python build_web_exe.py
+        
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: windows-exe-files
+        path: |
+          dist/PDFEditor.exe
+          dist/PDFEditorWeb.exe
+        retention-days: 30
+

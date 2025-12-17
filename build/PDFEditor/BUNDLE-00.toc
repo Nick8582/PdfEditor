@@ -1,0 +1,3 @@
+([('PDFEditor',
+   '/Users/nick/Desktop/Projects/pdf-editor/dist/PDFEditor',
+   'EXECUTABLE')],)
